@@ -24,16 +24,18 @@ public class MainTile : MonoBehaviour, IDragHandler, IEndDragHandler
 
     public void OnEndDrag (PointerEventData eventData)
     {
-        Ray2D ray = new Ray2D (transform.position, transform.right);
-        RaycastHit2D[] hits = Physics2D.RaycastAll (ray.origin, ray.direction, 10f);
-        for (int i = 0; i < hits.Length; i++)
+        Vector2 curMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+        RaycastHit2D hitRight = Physics2D.Raycast (curMousePos, Vector2.right);
+        Tile tile = null;
+        try
         {
-            Tile tile = hits[i].collider.gameObject.GetComponent<Tile> ();
-            if (tile)
-            {
-                GameHelper.Instance.SwapTwoTiles (this, tile);
-                break;
-            }
+            tile = hitRight.collider.gameObject.GetComponent<Tile> ();
+        }
+        catch { }
+        if (tile != null)
+        {
+            RaycastHit2D hitLeft = Physics2D.Raycast (hitRight.collider.transform.position, Vector2.left);
+            GameHelper.Instance.SwapTwoTiles (this, hitLeft.collider.gameObject.GetComponent<Tile> ());
         }
         _transform.position = _startPosition;
     }

@@ -42,6 +42,13 @@ public class BoardCreator : MonoBehaviour
                 newTile.spriteRenderer.sprite = _cashSprite;
             }
         }
+        for (int y = 0; y < _ySize; y++)
+        {
+            Tile newTile = Instantiate (_tile, transform.position, Quaternion.identity);
+            newTile.transform.position = new Vector3 (xPos + (tileSize.x * _xSize), yPos + (tileSize.y * y), 0);
+            newTile.transform.parent = transform;
+            newTile.spriteRenderer.sprite = null;
+        }
         return tileArray;
     }
 }

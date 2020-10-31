@@ -23,4 +23,9 @@ public class GameHelper : MonoBehaviour
         _borderController.SwapTwoTiles (mainTile, tile);
     }
 
+    public void LoadScene ()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene (0);
+    }
+
 }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 818556663951870016}
   - component: {fileID: 6123622717516470851}
   - component: {fileID: 4315806594863640399}
-  - component: {fileID: 4920489645352773174}
+  - component: {fileID: 1548287905967216986}
   m_Layer: 0
   m_Name: animal
   m_TagString: Untagged
@@ -96,8 +96,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 6123622717516470851}
-  isSelected: 0
---- !u!61 &4920489645352773174
+--- !u!61 &1548287905967216986
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -121,5 +120,5 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.71, y: 0.71}
+  m_Size: {x: 0.7, y: 0.7}
   m_EdgeRadius: 0

@@ -8,7 +8,6 @@ public class BoardController : MonoBehaviour
     private Tile[, ] _tiles;
     private Vector2[] dirRay = new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
     private bool _isFindMatch;
-    private bool _isShift;
     private bool _isSearchEmptyTile;
 
     public void SetValues (BoardSettings boardSettings, Tile[, ] tiles)
@@ -21,17 +20,19 @@ public class BoardController : MonoBehaviour
 
     public void SwapTwoTiles (MainTile mainTile, Tile tile)
     {
-        Sprite cashSprite = mainTile.image.sprite;
-        mainTile.image.sprite = tile.spriteRenderer.sprite;
-        tile.spriteRenderer.sprite = cashSprite;
-        FindAllMatch (tile);
+        if (!tile.isEmpty)
+        {
+            Sprite cashSprite = mainTile.image.sprite;
+            mainTile.image.sprite = tile.spriteRenderer.sprite;
+            tile.spriteRenderer.sprite = cashSprite;
+            FindAllMatch (tile);
+        }
     }
 
     private void Update ()
     {
         if (_isSearchEmptyTile)
         {
-            Debug.Log ("Update");
             SearchEmptyTile ();
         }
     }
@@ -82,46 +83,47 @@ public class BoardController : MonoBehaviour
     {
         for (int x = 0; x < _xSize; x++)
         {
-            for (int y = _ySize - 1; y > -1; y--)
+            for (int y = 0; y < _ySize; y++)
             {
-                if (_tiles[x, y].isEmpty)
-                {
-                    ShiftTileDown (x, y);
-                    //break;
-                }
-                if (x == _xSize - 1 && y == 0)
+                if (x == 0 && y == 0)
                 {
                     _isSearchEmptyTile = false;
                 }
-
+                if (_tiles[x, y].isEmpty)
+                {
+                    ShiftTileDown (x, y);
+                    break;
+                }
             }
         }
     }
 
     private void ShiftTileDown (int xPos, int yPos)
     {
-        _isShift = true;
         List<SpriteRenderer> cashRenderer = new List<SpriteRenderer> ();
-        for (int y = yPos; y < _ySize - 1; y++)
+        for (int y = yPos; y < _ySize; y++)
         {
-            Tile tile = _tiles[xPos, y + 1];
-            if (tile.isEmpty)
+            Tile tile = _tiles[xPos, y];
+            if (!tile.isEmpty)
             {
-                //cashRenderer.Add (tile.spriteRenderer);
-                _tiles[xPos, y].spriteRenderer.sprite = _tiles[xPos, y + 1].spriteRenderer.sprite;
+                cashRenderer.Add (tile.spriteRenderer);
             }
         }
-        SetNewSprite (xPos, cashRenderer);
-        _isShift = false;
+        SetNewSprite (xPos, yPos, cashRenderer);
     }
 
-    private void SetNewSprite (int xPos, List<SpriteRenderer> renderers)
+    private void SetNewSprite (int xPos, int yPos, List<SpriteRenderer> renderers)
     {
-        for (int y = 0; y < renderers.Count - 1; y++)
+        int yEndPos = yPos + renderers.Count;
+        for (int y = yPos; y < yEndPos; y++)
         {
-            renderers[y].sprite = renderers[y + 1].sprite;
-            renderers[y + 1].sprite = _tileSprites[0];
+            _tiles[xPos, y].spriteRenderer.sprite = renderers[y - yPos].sprite;
         }
+        for (int y = yEndPos; y < _ySize; y++)
+        {
+            _tiles[xPos, y].spriteRenderer.sprite = null;
+        }
+
     }
 
 }
