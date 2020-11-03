@@ -8,8 +8,6 @@ public class BoardController : MonoBehaviour
     private Tile[, ] _tiles;
     private Vector2[] dirRay = new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
     private bool _isFindMatch;
-    private bool _isSearchEmptyTile;
-
     public void SetValues (BoardSettings boardSettings, Tile[, ] tiles)
     {
         _xSize = boardSettings.xSize;
@@ -27,16 +25,8 @@ public class BoardController : MonoBehaviour
             tile.spriteRenderer.sprite = cashSprite;
             FindAllMatch (tile);
         }
+        SearchEmptyTile ();
     }
-
-    private void Update ()
-    {
-        if (_isSearchEmptyTile)
-        {
-            SearchEmptyTile ();
-        }
-    }
-
     private List<Tile> FindMatch (Tile tile, Vector2 dir)
     {
         List<Tile> cashFindTile = new List<Tile> ();
@@ -58,6 +48,10 @@ public class BoardController : MonoBehaviour
         }
         if (cashFindSprite.Count >= 2)
         {
+            if (cashFindSprite.Count >= 4)
+            {
+                DataWorker.Instance.AddCrystal (1);
+            }
             for (int i = 0; i < cashFindSprite.Count; i++)
             {
                 cashFindSprite[i].spriteRenderer.sprite = null;
@@ -75,8 +69,8 @@ public class BoardController : MonoBehaviour
         {
             _isFindMatch = false;
             tile.spriteRenderer.sprite = null;
-            _isSearchEmptyTile = true;
         }
+
     }
 
     private void SearchEmptyTile ()
@@ -85,13 +79,9 @@ public class BoardController : MonoBehaviour
         {
             for (int y = 0; y < _ySize; y++)
             {
-                if (x == 0 && y == 0)
-                {
-                    _isSearchEmptyTile = false;
-                }
                 if (_tiles[x, y].isEmpty)
                 {
-                    ShiftTileDown (x, y);
+                    ShiftTileRight (x, y);
                     break;
                 }
             }
@@ -109,10 +99,38 @@ public class BoardController : MonoBehaviour
                 cashRenderer.Add (tile.spriteRenderer);
             }
         }
-        SetNewSprite (xPos, yPos, cashRenderer);
+        SetNewSpriteDown (xPos, yPos, cashRenderer);
     }
 
-    private void SetNewSprite (int xPos, int yPos, List<SpriteRenderer> renderers)
+    private void ShiftTileUp (int xPos, int yPos)
+    {
+        List<SpriteRenderer> cashRenderer = new List<SpriteRenderer> ();
+        for (int y = _ySize - 1; y > -1; y--)
+        {
+            Tile tile = _tiles[xPos, y];
+            if (!tile.isEmpty)
+            {
+                cashRenderer.Add (tile.spriteRenderer);
+            }
+        }
+        SetNewSpriteUp (xPos, yPos, cashRenderer);
+    }
+
+    private void ShiftTileRight (int xPos, int yPos)
+    {
+        List<SpriteRenderer> cashRenderer = new List<SpriteRenderer> ();
+        for (int x = _xSize - 1; x > -1; x--)
+        {
+            Tile tile = _tiles[x, yPos];
+            if (!tile.isEmpty)
+            {
+                cashRenderer.Add (tile.spriteRenderer);
+            }
+        }
+        SetNewSpriteRight (xPos, yPos, cashRenderer);
+    }
+
+    private void SetNewSpriteDown (int xPos, int yPos, List<SpriteRenderer> renderers)
     {
         int yEndPos = yPos + renderers.Count;
         for (int y = yPos; y < yEndPos; y++)
@@ -123,7 +141,32 @@ public class BoardController : MonoBehaviour
         {
             _tiles[xPos, y].spriteRenderer.sprite = null;
         }
+    }
 
+    private void SetNewSpriteUp (int xPos, int yPos, List<SpriteRenderer> renderers)
+    {
+        int yEndPos = _ySize - renderers.Count - 1;
+        for (int y = _ySize - 1; y > yEndPos; y--)
+        {
+            _tiles[xPos, y].spriteRenderer.sprite = renderers[_ySize - 1 - y].sprite;
+        }
+        for (int y = yEndPos; y > -1; y--)
+        {
+            _tiles[xPos, y].spriteRenderer.sprite = null;
+        }
+    }
+
+    private void SetNewSpriteRight (int xPos, int yPos, List<SpriteRenderer> renderers)
+    {
+        int xEndPos = _xSize - renderers.Count - 1;
+        for (int x = _xSize - 1; x > xEndPos; x--)
+        {
+            _tiles[x, yPos].spriteRenderer.sprite = renderers[_xSize - 1 - x].sprite;
+        }
+        for (int x = xEndPos; x > -1; x--)
+        {
+            _tiles[x, yPos].spriteRenderer.sprite = null;
+        }
     }
 
 }
