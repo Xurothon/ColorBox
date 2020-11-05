@@ -6,6 +6,8 @@ public class GameHelper : MonoBehaviour
     public BoardSettings boardSettings;
     [SerializeField] private BoardCreator _borderCreator;
     [SerializeField] private BoardController _borderController;
+    [SerializeField] private TileChanger _tileChanger;
+    public GravityDirection gravityDirection;
 
     private void Awake ()
     {
@@ -23,9 +25,18 @@ public class GameHelper : MonoBehaviour
         _borderController.SwapTwoTiles (mainTile, tile);
     }
 
+    public void ChangeSpriteTile (Tile tile, Sprite sprite)
+    {
+        _borderController.ChageSpriteTile (tile, sprite);
+    }
+
     public void LoadScene ()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene (0);
     }
 
+    public void DisableCileChanger ()
+    {
+        _tileChanger.DisableChanger ();
+    }
 }

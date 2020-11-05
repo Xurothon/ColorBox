@@ -7,12 +7,18 @@ public class DataWorker : MonoBehaviour
     public static DataWorker Instance;
     public int Crystal { get; private set; }
 
-    [HideInInspector] public MyIntEvent OnChangeCrystal;
+    [HideInInspector] public MyIntEvent OnValueChangeCrystal;
 
     public void AddCrystal (int value)
     {
         Crystal += value;
-        OnChangeCrystal.Invoke (Crystal);
+        OnValueChangeCrystal?.Invoke (Crystal);
+    }
+
+    public void DeductCrystal (int value)
+    {
+        Crystal -= value;
+        OnValueChangeCrystal?.Invoke (Crystal);
     }
 
     private void Awake ()
@@ -40,10 +46,9 @@ public class DataWorker : MonoBehaviour
         PlayerPrefs.SetInt (playerPrefsKey, value);
     }
 
-    private void OnDestroy ()
+    private void OnDisable ()
     {
         SaveValue (PlayerPrefsKeys.CURRENT_CRYSTAL.ToString (), Crystal);
-        OnChangeCrystal.RemoveAllListeners ();
+        OnValueChangeCrystal.RemoveAllListeners ();
     }
-
 }

@@ -6,7 +6,7 @@ public class UICrystalChanger : MonoBehaviour
 
     private void Start ()
     {
-        DataWorker.Instance.OnChangeCrystal.AddListener (ChangeCrystalText);
+        DataWorker.Instance.OnValueChangeCrystal.AddListener (ChangeCrystalText);
         _crystalText.text = "x" + DataWorker.Instance.Crystal;
     }
 
