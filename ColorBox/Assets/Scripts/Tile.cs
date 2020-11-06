@@ -3,6 +3,9 @@
 public class Tile : MonoBehaviour
 {
     public SpriteRenderer spriteRenderer;
+    public bool isBlock;
+    public int xPosition;
+    public int yPosition;
     public bool isEmpty
     {
         get

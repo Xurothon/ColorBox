@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class BoardCreator : MonoBehaviour
 {
+
+    [SerializeField] private int _maxBlocksCount;
+    [SerializeField] private int _minBlockCount;
+    private Sprite _blockSprite;
+    private bool _useBlocks;
     private int _xSize, _ySize;
     private Tile _tile;
     private List<Sprite> _tileSprites = new List<Sprite> ();
@@ -14,6 +19,8 @@ public class BoardCreator : MonoBehaviour
         _ySize = boardSettings.ySize;
         _tile = boardSettings.tile;
         _tileSprites = boardSettings.tileSprites;
+        _useBlocks = boardSettings.useBlocks;
+        _blockSprite = boardSettings.blockSprite;
         return CreateBoard ();
     }
 
@@ -49,6 +56,47 @@ public class BoardCreator : MonoBehaviour
             newTile.transform.parent = transform;
             newTile.spriteRenderer.sprite = null;
         }
+        if (_useBlocks)
+        {
+            CreateBlocks (tileArray);
+        }
         return tileArray;
+    }
+
+    private void CreateBlocks (Tile[, ] tiles)
+    {
+        int blockCount = Random.Range (_minBlockCount, _maxBlocksCount + 1);
+        List<int> xBlockPositions = new List<int> ();
+        while (xBlockPositions.Count < blockCount)
+        {
+            int tempXPosition = Random.Range (0, _xSize);
+            if (!xBlockPositions.Contains (tempXPosition))
+            {
+                xBlockPositions.Add (tempXPosition);
+            }
+        }
+
+        for (int i = 0; i < xBlockPositions.Count; i++)
+        {
+            int tempYPosition = Random.Range (1, _ySize - 1);
+            CreateOneBlock (tiles[xBlockPositions[i], tempYPosition], xBlockPositions[i], tempYPosition);
+            int nextYPositionBlock = GetNextYPosition ();
+            CreateOneBlock (tiles[xBlockPositions[i], tempYPosition + nextYPositionBlock], xBlockPositions[i], tempYPosition + nextYPositionBlock);
+        }
+    }
+
+    private void CreateOneBlock (Tile tile, int xPos, int yPos)
+    {
+        tile.isBlock = true;
+        tile.spriteRenderer.sprite = _blockSprite;
+        tile.xPosition = xPos;
+        tile.yPosition = yPos;
+    }
+
+    private int GetNextYPosition ()
+    {
+        int tempValue = Random.Range (0, 2);
+        if (tempValue == 0) return -1;
+        return tempValue;
     }
 }

@@ -10,6 +10,7 @@ public class GravityChanger : MonoBehaviour
 
     public void ChangeGravityDirection ()
     {
+        SoundsHelper.Instance.PlayGravitationClip();
         _currentGravityStoreIndex++;
         if (_currentGravityStoreIndex == _gravityStore.Length) _currentGravityStoreIndex = 0;
         ChangeGravityImage ();

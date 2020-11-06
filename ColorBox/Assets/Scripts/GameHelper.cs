@@ -27,7 +27,7 @@ public class GameHelper : MonoBehaviour
 
     public void ChangeSpriteTile (Tile tile, Sprite sprite)
     {
-        _borderController.ChageSpriteTile (tile, sprite);
+        _borderController.ChangeSpriteTile (tile, sprite);
     }
 
     public void LoadScene ()

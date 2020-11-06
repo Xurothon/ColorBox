@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [RequireComponent (typeof (Image), typeof (RectTransform))]
-public class MainTile : MonoBehaviour, IDragHandler, IEndDragHandler
+public class MainTile : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDownHandler
 {
     public Image image;
     private RectTransform _transform;
@@ -38,5 +38,10 @@ public class MainTile : MonoBehaviour, IDragHandler, IEndDragHandler
             GameHelper.Instance.SwapTwoTiles (this, hitLeft.collider.gameObject.GetComponent<Tile> ());
         }
         _transform.position = _startPosition;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        SoundsHelper.Instance.PlayTakeTileClip();
     }
 }
