@@ -17,7 +17,7 @@ public class BonusPriceList : MonoBehaviour
 
     public bool IsBuyStepCancel ()
     {
-        if (DataWorker.Instance.Crystal >= _stepCancelCost)
+        if (DataWorker.Instance.crystal >= _stepCancelCost)
         {
             DataWorker.Instance.DeductCrystal (_stepCancelCost);
             return true;
@@ -31,7 +31,7 @@ public class BonusPriceList : MonoBehaviour
 
     public bool IsBuyTileChange ()
     {
-        if (DataWorker.Instance.Crystal >= _tileChangeCost)
+        if (DataWorker.Instance.crystal >= _tileChangeCost)
         {
             DataWorker.Instance.DeductCrystal (_tileChangeCost);
             GameUIHelper.Instance.ShowTileChangePanel ();

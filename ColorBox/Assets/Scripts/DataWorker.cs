@@ -5,20 +5,36 @@ public class MyIntEvent : UnityEngine.Events.UnityEvent<int> { }
 public class DataWorker : MonoBehaviour
 {
     public static DataWorker Instance;
-    public int Crystal { get; private set; }
+    public int crystal { get; private set; }
+    public int isBuyAdsOff { get; private set; }
+    public int levelCompleteCount { get; private set; }
 
     [HideInInspector] public MyIntEvent OnValueChangeCrystal;
 
     public void AddCrystal (int value)
     {
-        Crystal += value;
-        OnValueChangeCrystal?.Invoke (Crystal);
+        crystal += value;
+        OnValueChangeCrystal?.Invoke (crystal);
     }
 
     public void DeductCrystal (int value)
     {
-        Crystal -= value;
-        OnValueChangeCrystal?.Invoke (Crystal);
+        crystal -= value;
+        OnValueChangeCrystal?.Invoke (crystal);
+    }
+    public void BuyAdsOff ()
+    {
+        isBuyAdsOff = 1;
+    }
+
+    public void AddLevelCompleteCount ()
+    {
+        levelCompleteCount++;
+    }
+
+    public void ResetLevelCompleteCount ()
+    {
+        levelCompleteCount = 0;
     }
 
     private void Awake ()
@@ -29,7 +45,9 @@ public class DataWorker : MonoBehaviour
 
     private void ReadAllPlayerPrefs ()
     {
-        Crystal = GetValue (PlayerPrefsKeys.CURRENT_CRYSTAL.ToString ());
+        crystal = GetValue (PlayerPrefsKeys.CURRENT_CRYSTAL.ToString ());
+        isBuyAdsOff = GetValue (PlayerPrefsKeys.IS_BUY_ADS_OFF.ToString ());
+        levelCompleteCount = GetValue (PlayerPrefsKeys.LEVEL_COMPLETE_COUNT.ToString ());
     }
 
     private int GetValue (string playerPrefsKey)
@@ -48,7 +66,9 @@ public class DataWorker : MonoBehaviour
 
     private void OnDisable ()
     {
-        SaveValue (PlayerPrefsKeys.CURRENT_CRYSTAL.ToString (), Crystal);
+        SaveValue (PlayerPrefsKeys.CURRENT_CRYSTAL.ToString (), crystal);
+        SaveValue (PlayerPrefsKeys.IS_BUY_ADS_OFF.ToString (), isBuyAdsOff);
+        SaveValue (PlayerPrefsKeys.LEVEL_COMPLETE_COUNT.ToString (), levelCompleteCount);
         OnValueChangeCrystal.RemoveAllListeners ();
     }
 }

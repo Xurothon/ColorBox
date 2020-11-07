@@ -3,9 +3,8 @@ using UnityEngine;
 
 public class BoardCreator : MonoBehaviour
 {
-
-    [SerializeField] private int _maxBlocksCount;
     [SerializeField] private int _minBlockCount;
+    [SerializeField] private int _maxBlocksCount;
     private Sprite _blockSprite;
     private bool _useBlocks;
     private int _xSize, _ySize;

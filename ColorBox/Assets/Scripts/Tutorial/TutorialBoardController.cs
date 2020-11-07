@@ -45,7 +45,11 @@ public class TutorialBoardController : MonoBehaviour
                 }
             }
         }
-        if (_isLevelComplete) GameUIHelper.Instance.ShowLevelCompletePanel ();
+        if (_isLevelComplete)
+        {
+            DataWorker.Instance.AddLevelCompleteCount ();
+            GameUIHelper.Instance.ShowLevelCompletePanel ();
+        }
     }
 
     private void Start ()
@@ -90,6 +94,7 @@ public class TutorialBoardController : MonoBehaviour
         DeleteSprite (tile, new Vector2[] { Vector2.left, Vector2.right });
         if (_isFindMatch)
         {
+            SoundsHelper.Instance.PlayDisappearanceTile ();
             _isFindMatch = false;
             tile.spriteRenderer.sprite = null;
         }

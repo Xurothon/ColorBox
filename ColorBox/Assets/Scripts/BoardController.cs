@@ -29,13 +29,16 @@ public class BoardController : MonoBehaviour
     {
         if (!tile.isEmpty)
         {
-            _stepCancel.SavePreviosStep ();
-            Sprite cashSprite = mainTile.image.sprite;
-            mainTile.image.sprite = tile.spriteRenderer.sprite;
-            tile.spriteRenderer.sprite = cashSprite;
-            FindAllMatch (tile);
-            SearchEmptyTile ();
-            CheckLevelComplete ();
+            if (!tile.isBlock)
+            {
+                _stepCancel.SavePreviosStep ();
+                Sprite cashSprite = mainTile.image.sprite;
+                mainTile.image.sprite = tile.spriteRenderer.sprite;
+                tile.spriteRenderer.sprite = cashSprite;
+                FindAllMatch (tile);
+                SearchEmptyTile ();
+                CheckLevelComplete ();
+            }
         }
     }
 
@@ -61,7 +64,11 @@ public class BoardController : MonoBehaviour
                 }
             }
         }
-        if (_isLevelComplete) GameUIHelper.Instance.ShowLevelCompletePanel ();
+        if (_isLevelComplete)
+        {
+            DataWorker.Instance.AddLevelCompleteCount ();
+            GameUIHelper.Instance.ShowLevelCompletePanel ();
+        }
     }
 
     private void Start ()

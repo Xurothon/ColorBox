@@ -2843,8 +2843,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 375e0194d02ab6b42bb8b07ae9950276, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxBlocksCount: 2
-  _minBlockCount: 3
+  _minBlockCount: 0
+  _maxBlocksCount: 0
 --- !u!4 &1042605289
 Transform:
   m_ObjectHideFlags: 0
@@ -3203,8 +3203,8 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 5990fd125ec0906489c41f071ace04bb, type: 3}
     - {fileID: 21300000, guid: ff59180cf4ff49c46887cf98e1a7d370, type: 3}
     - {fileID: 21300000, guid: af1e65785059ace4194cb2d6c5634e1f, type: 3}
-    useBlocks: 1
-    blockSprite: {fileID: 21300000, guid: a6f686cf70ba0994c87773960f28b4ae, type: 3}
+    useBlocks: 0
+    blockSprite: {fileID: 0}
   _borderCreator: {fileID: 1042605288}
   _borderController: {fileID: 187343683}
   _tileChanger: {fileID: 0}
