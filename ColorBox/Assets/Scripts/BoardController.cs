@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BoardController : MonoBehaviour
@@ -8,8 +9,6 @@ public class BoardController : MonoBehaviour
     private int _xSize, _ySize;
     private List<Sprite> _tileSprites = new List<Sprite> ();
     private Tile[, ] _tiles;
-    private Vector2[] dirRay = new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
-    private bool _isFindMatch;
     private bool _isLevelComplete;
     private bool _useBlocks;
     private Sprite _blockSprite;
@@ -36,8 +35,6 @@ public class BoardController : MonoBehaviour
                 mainTile.image.sprite = tile.spriteRenderer.sprite;
                 tile.spriteRenderer.sprite = cashSprite;
                 FindAllMatch (tile);
-                SearchEmptyTile ();
-                CheckLevelComplete ();
             }
         }
     }
@@ -47,8 +44,6 @@ public class BoardController : MonoBehaviour
         _stepCancel.SavePreviosStep ();
         tile.spriteRenderer.sprite = sprite;
         FindAllMatch (tile);
-        SearchEmptyTile ();
-        CheckLevelComplete ();
     }
 
     private void CheckLevelComplete ()
@@ -96,32 +91,34 @@ public class BoardController : MonoBehaviour
         {
             cashFindSprite.AddRange (FindMatch (tile, dirArray[i]));
         }
-        if (cashFindSprite.Count >= 2)
+        if (cashFindSprite.Count > 1)
         {
-            SoundsHelper.Instance.PlayDisappearanceTile ();
-            if (cashFindSprite.Count >= 4)
+            if (cashFindSprite.Count > 2)
             {
                 DataWorker.Instance.AddCrystal (1);
             }
-            for (int i = 0; i < cashFindSprite.Count; i++)
-            {
-                cashFindSprite[i].spriteRenderer.sprite = null;
-            }
-            _isFindMatch = true;
+            StartCoroutine (DeleteSprites (tile, cashFindSprite));
         }
+    }
+
+    private IEnumerator DeleteSprites (Tile tile, List<Tile> cashTiles)
+    {
+        tile.spriteRenderer.sprite = null;
+        yield return new WaitForSeconds (0.15f);
+        for (int i = 0; i < cashTiles.Count; i++)
+        {
+            SoundsHelper.Instance.PlayDisappearanceTile ();
+            cashTiles[i].spriteRenderer.sprite = null;
+            yield return new WaitForSeconds (0.15f);
+        }
+        SearchEmptyTile ();
+        CheckLevelComplete ();
     }
 
     private void FindAllMatch (Tile tile)
     {
         if (tile.isEmpty) return;
-        DeleteSprite (tile, new Vector2[] { Vector2.up, Vector2.down });
-        DeleteSprite (tile, new Vector2[] { Vector2.left, Vector2.right });
-        if (_isFindMatch)
-        {
-            SoundsHelper.Instance.PlayDisappearanceTile ();
-            _isFindMatch = false;
-            tile.spriteRenderer.sprite = null;
-        }
+        DeleteSprite (tile, new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right });
     }
 
     private void SearchEmptyTile ()

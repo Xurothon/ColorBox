@@ -30,9 +30,17 @@ public class GameHelper : MonoBehaviour
         _borderController.ChangeSpriteTile (tile, sprite);
     }
 
-    public void LoadScene ()
+    public void LoadMainScene ()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene (0);
+    }
+
+    public void LoadNextScene ()
+    {
+        int currentScene = UnityEngine.SceneManagement.SceneManager.sceneCount;
+        currentScene++;
+        if (currentScene > UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings - 1) currentScene = 0;
+        UnityEngine.SceneManagement.SceneManager.LoadScene (currentScene);
     }
 
     public void DisableCileChanger ()

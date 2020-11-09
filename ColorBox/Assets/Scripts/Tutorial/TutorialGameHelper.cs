@@ -33,6 +33,13 @@ public class TutorialGameHelper : MonoBehaviour
         UnityEngine.SceneManagement.SceneManager.LoadScene (0);
     }
 
+    public void LoadNextScene ()
+    {
+        int currentScene = UnityEngine.SceneManagement.SceneManager.sceneCount;
+        currentScene++;
+        UnityEngine.SceneManagement.SceneManager.LoadScene (currentScene);
+    }
+
     public void StartTutorial1 ()
     {
         _dragTutorial.StartTutorial ();

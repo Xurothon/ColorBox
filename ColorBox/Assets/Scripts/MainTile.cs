@@ -30,6 +30,7 @@ public class MainTile : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDo
         try
         {
             tile = hitRight.collider.gameObject.GetComponent<Tile> ();
+            Debug.Log (tile.spriteRenderer.sprite.name);
         }
         catch { }
         if (tile != null)
@@ -40,8 +41,8 @@ public class MainTile : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDo
         _transform.position = _startPosition;
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public void OnPointerDown (PointerEventData eventData)
     {
-        SoundsHelper.Instance.PlayTakeTileClip();
+        SoundsHelper.Instance.PlayTakeTileClip ();
     }
 }
