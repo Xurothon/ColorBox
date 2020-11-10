@@ -10,11 +10,14 @@ public class GravityChanger : MonoBehaviour
 
     public void ChangeGravityDirection ()
     {
-        SoundsHelper.Instance.PlayGravitationClip();
-        _currentGravityStoreIndex++;
-        if (_currentGravityStoreIndex == _gravityStore.Length) _currentGravityStoreIndex = 0;
-        ChangeGravityImage ();
-        OnGravityChange?.Invoke ();
+        if (!GameHelper.Instance.IsSearchEmptyTile)
+        {
+            SoundsHelper.Instance.PlayGravitationClip ();
+            _currentGravityStoreIndex++;
+            if (_currentGravityStoreIndex == _gravityStore.Length) _currentGravityStoreIndex = 0;
+            ChangeGravityImage ();
+            OnGravityChange?.Invoke ();
+        }
     }
 
     public GravityDirection GetDirection ()

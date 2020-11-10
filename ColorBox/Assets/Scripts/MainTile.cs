@@ -30,7 +30,6 @@ public class MainTile : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDo
         try
         {
             tile = hitRight.collider.gameObject.GetComponent<Tile> ();
-            Debug.Log (tile.spriteRenderer.sprite.name);
         }
         catch { }
         if (tile != null)

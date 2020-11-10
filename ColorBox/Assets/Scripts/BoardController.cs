@@ -11,6 +11,8 @@ public class BoardController : MonoBehaviour
     private Tile[, ] _tiles;
     private bool _isLevelComplete;
     private bool _useBlocks;
+    private bool _isFindMatchAgain;
+    private bool _isStopFindMatch;
     private Sprite _blockSprite;
 
     public void SetValues (BoardSettings boardSettings, Tile[, ] tiles)
@@ -76,10 +78,52 @@ public class BoardController : MonoBehaviour
     {
         List<Tile> cashFindTile = new List<Tile> ();
         RaycastHit2D hit = Physics2D.Raycast (tile.transform.position, dir);
-        while (hit.collider != null && hit.collider.gameObject.GetComponent<Tile> ().spriteRenderer.sprite == tile.spriteRenderer.sprite)
+        switch (dir.y)
         {
-            cashFindTile.Add (hit.collider.gameObject.GetComponent<Tile> ());
-            hit = Physics2D.Raycast (hit.collider.transform.position, dir);
+            case 0:
+                {
+                    while (hit.collider != null && hit.collider.gameObject.GetComponent<Tile> ().spriteRenderer.sprite == tile.spriteRenderer.sprite)
+                    {
+                        Tile tempTile = hit.collider.gameObject.GetComponent<Tile> ();
+                        if (!cashFindTile.Contains (tempTile))
+                        {
+                            FindNeighborsMatch (tempTile, new Vector2[] { Vector2.up, Vector2.down }, cashFindTile);
+                            cashFindTile.Add (hit.collider.gameObject.GetComponent<Tile> ());
+                            hit = Physics2D.Raycast (hit.collider.transform.position, dir);
+                        }
+                    }
+                    break;
+                }
+            default:
+                while (hit.collider != null && hit.collider.gameObject.GetComponent<Tile> ().spriteRenderer.sprite == tile.spriteRenderer.sprite)
+                {
+                    Tile tempTile = hit.collider.gameObject.GetComponent<Tile> ();
+                    if (!cashFindTile.Contains (tempTile))
+                    {
+                        FindNeighborsMatch (tempTile, new Vector2[] { Vector2.left, Vector2.right }, cashFindTile);
+                        cashFindTile.Add (hit.collider.gameObject.GetComponent<Tile> ());
+                        hit = Physics2D.Raycast (hit.collider.transform.position, dir);
+                    }
+                }
+                break;
+        }
+        return cashFindTile;
+    }
+
+    private List<Tile> FindNeighborsMatch (Tile tile, Vector2[] dir, List<Tile> cashFindTile)
+    {
+        for (int i = 0; i < dir.Length; i++)
+        {
+            RaycastHit2D hit = Physics2D.Raycast (tile.transform.position, dir[i]);
+            while (hit.collider != null && hit.collider.gameObject.GetComponent<Tile> ().spriteRenderer.sprite == tile.spriteRenderer.sprite)
+            {
+                Tile tempTile = hit.collider.gameObject.GetComponent<Tile> ();
+                if (!cashFindTile.Contains (tempTile))
+                {
+                    cashFindTile.Add (hit.collider.gameObject.GetComponent<Tile> ());
+                    hit = Physics2D.Raycast (hit.collider.transform.position, dir[i]);
+                }
+            }
         }
         return cashFindTile;
     }
@@ -104,25 +148,51 @@ public class BoardController : MonoBehaviour
     private IEnumerator DeleteSprites (Tile tile, List<Tile> cashTiles)
     {
         tile.spriteRenderer.sprite = null;
-        yield return new WaitForSeconds (0.15f);
+        yield return new WaitForSeconds (0.1f);
         for (int i = 0; i < cashTiles.Count; i++)
         {
             SoundsHelper.Instance.PlayDisappearanceTile ();
             cashTiles[i].spriteRenderer.sprite = null;
-            yield return new WaitForSeconds (0.15f);
+            yield return new WaitForSeconds (0.1f);
         }
         SearchEmptyTile ();
         CheckLevelComplete ();
     }
 
+    private void FindAllMatchAterGravityChange ()
+    {
+        _isStopFindMatch = false;
+        while (!_isStopFindMatch)
+            FindAllMatchLoop ();
+    }
+
+    private void FindAllMatchLoop ()
+    {
+        for (int x = 0; x < _xSize; x++)
+        {
+            for (int y = 0; y < _ySize; y++)
+            {
+                FindAllMatch (_tiles[x, y]);
+                if (_isFindMatchAgain)
+                {
+                    return;
+                }
+            }
+            if (x == _xSize - 1)
+            {
+                _isStopFindMatch = true;
+            }
+        }
+    }
     private void FindAllMatch (Tile tile)
     {
         if (tile.isEmpty) return;
-        DeleteSprite (tile, new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right });
+        DeleteSprite (tile, new Vector2[] { Vector2.up, Vector2.left, Vector2.down, Vector2.right });
     }
 
     private void SearchEmptyTile ()
     {
+        GameHelper.Instance.StartSearchEmptyTile ();
         switch (_gravityChganger.GetDirection ())
         {
             case GravityDirection.RIGHT:
@@ -137,6 +207,8 @@ public class BoardController : MonoBehaviour
                     break;
                 }
         }
+        FindAllMatchAterGravityChange ();
+        GameHelper.Instance.EndSearchEmptyTile ();
     }
 
     private void SerchEmptyHorizontalTile ()
@@ -199,23 +271,23 @@ public class BoardController : MonoBehaviour
     #region DownGravity
     private void ShiftTileDown (int xPos, int yPos)
     {
-        List<SpriteRenderer> cashRenderer = new List<SpriteRenderer> ();
+        List<Sprite> cashRenderer = new List<Sprite> ();
         for (int y = 0; y < _ySize; y++)
         {
             Tile tile = _tiles[xPos, y];
             if (!tile.isEmpty)
             {
-                cashRenderer.Add (tile.spriteRenderer);
+                cashRenderer.Add (tile.spriteRenderer.sprite);
             }
         }
         SetNewSpriteDown (xPos, yPos, cashRenderer);
     }
-    private void SetNewSpriteDown (int xPos, int yPos, List<SpriteRenderer> renderers)
+    private void SetNewSpriteDown (int xPos, int yPos, List<Sprite> renderers)
     {
         int yEndPos = renderers.Count;
         for (int y = 0; y < yEndPos; y++)
         {
-            _tiles[xPos, y].spriteRenderer.sprite = renderers[y].sprite;
+            _tiles[xPos, y].spriteRenderer.sprite = renderers[y];
         }
         for (int y = yEndPos; y < _ySize; y++)
         {
@@ -281,23 +353,23 @@ public class BoardController : MonoBehaviour
     #region UpGravity
     private void ShiftTileUp (int xPos, int yPos)
     {
-        List<SpriteRenderer> cashRenderer = new List<SpriteRenderer> ();
+        List<Sprite> cashRenderer = new List<Sprite> ();
         for (int y = _ySize - 1; y > -1; y--)
         {
             Tile tile = _tiles[xPos, y];
             if (!tile.isEmpty)
             {
-                cashRenderer.Add (tile.spriteRenderer);
+                cashRenderer.Add (tile.spriteRenderer.sprite);
             }
         }
         SetNewSpriteUp (xPos, yPos, cashRenderer);
     }
-    private void SetNewSpriteUp (int xPos, int yPos, List<SpriteRenderer> renderers)
+    private void SetNewSpriteUp (int xPos, int yPos, List<Sprite> renderers)
     {
         int yEndPos = _ySize - renderers.Count - 1;
         for (int y = _ySize - 1; y > yEndPos; y--)
         {
-            _tiles[xPos, y].spriteRenderer.sprite = renderers[_ySize - 1 - y].sprite;
+            _tiles[xPos, y].spriteRenderer.sprite = renderers[_ySize - 1 - y];
         }
         for (int y = yEndPos; y > -1; y--)
         {
@@ -363,24 +435,24 @@ public class BoardController : MonoBehaviour
     #region RightGravity
     private void ShiftTileRight (int xPos, int yPos)
     {
-        List<SpriteRenderer> cashRenderer = new List<SpriteRenderer> ();
+        List<Sprite> cashRenderer = new List<Sprite> ();
         for (int x = _xSize - 1; x > -1; x--)
         {
             Tile tile = _tiles[x, yPos];
             if (!tile.isEmpty)
             {
-                cashRenderer.Add (tile.spriteRenderer);
+                cashRenderer.Add (tile.spriteRenderer.sprite);
             }
         }
         SetNewSpriteRight (xPos, yPos, cashRenderer);
     }
 
-    private void SetNewSpriteRight (int xPos, int yPos, List<SpriteRenderer> renderers)
+    private void SetNewSpriteRight (int xPos, int yPos, List<Sprite> renderers)
     {
         int xEndPos = _xSize - renderers.Count - 1;
         for (int x = _xSize - 1; x > xEndPos; x--)
         {
-            _tiles[x, yPos].spriteRenderer.sprite = renderers[_xSize - 1 - x].sprite;
+            _tiles[x, yPos].spriteRenderer.sprite = renderers[_xSize - 1 - x];
         }
         for (int x = xEndPos; x > -1; x--)
         {
@@ -401,7 +473,6 @@ public class BoardController : MonoBehaviour
                 if (!_tiles[x, yPos].isBlock)
                 {
                     ShiftBlocksRight (x, yPos);
-                    break;
                 }
             }
         }
@@ -447,24 +518,24 @@ public class BoardController : MonoBehaviour
     #region LeftGravity
     private void ShiftTileLeft (int xPos, int yPos)
     {
-        List<SpriteRenderer> cashRenderer = new List<SpriteRenderer> ();
+        List<Sprite> cashRenderer = new List<Sprite> ();
         for (int x = 0; x < _xSize; x++)
         {
             Tile tile = _tiles[x, yPos];
             if (!tile.isEmpty)
             {
-                cashRenderer.Add (tile.spriteRenderer);
+                cashRenderer.Add (tile.spriteRenderer.sprite);
             }
         }
         SetNewSpriteLeft (xPos, yPos, cashRenderer);
     }
 
-    private void SetNewSpriteLeft (int xPos, int yPos, List<SpriteRenderer> renderers)
+    private void SetNewSpriteLeft (int xPos, int yPos, List<Sprite> renderers)
     {
         int xEndPos = renderers.Count;
         for (int x = 0; x < xEndPos; x++)
         {
-            _tiles[x, yPos].spriteRenderer.sprite = renderers[x].sprite;
+            _tiles[x, yPos].spriteRenderer.sprite = renderers[x];
         }
         for (int x = xEndPos; x < _xSize; x++)
         {
@@ -485,7 +556,6 @@ public class BoardController : MonoBehaviour
                 if (!_tiles[x, yPos].isBlock)
                 {
                     ShiftBlocksLeft (x, yPos);
-                    break;
                 }
             }
         }

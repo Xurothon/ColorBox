@@ -8,6 +8,8 @@ public class GameHelper : MonoBehaviour
     [SerializeField] private BoardController _borderController;
     [SerializeField] private TileChanger _tileChanger;
     public GravityDirection gravityDirection;
+    private bool _isSearchEmptyTile;
+    public bool IsSearchEmptyTile { get { return _isSearchEmptyTile; } }
 
     private void Awake ()
     {
@@ -46,5 +48,14 @@ public class GameHelper : MonoBehaviour
     public void DisableCileChanger ()
     {
         _tileChanger.DisableChanger ();
+    }
+    public void StartSearchEmptyTile ()
+    {
+        _isSearchEmptyTile = true;
+    }
+
+    public void EndSearchEmptyTile ()
+    {
+        _isSearchEmptyTile = false;
     }
 }
