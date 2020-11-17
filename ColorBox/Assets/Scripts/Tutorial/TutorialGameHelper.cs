@@ -33,6 +33,11 @@ public class TutorialGameHelper : MonoBehaviour
         UnityEngine.SceneManagement.SceneManager.LoadScene (0);
     }
 
+    public void ResetLevel ()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene (1);
+    }
+
     public void LoadNextScene ()
     {
         int currentScene = UnityEngine.SceneManagement.SceneManager.sceneCount;

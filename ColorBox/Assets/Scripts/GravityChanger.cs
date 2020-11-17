@@ -2,22 +2,55 @@
 
 public class GravityChanger : MonoBehaviour
 {
-
     [HideInInspector] public UnityEngine.Events.UnityEvent OnGravityChange;
     [SerializeField] private GravityStore[] _gravityStore;
-    [SerializeField] private UnityEngine.UI.Image _buttonImage;
+    [SerializeField] private Camera _mainCamera;
     private int _currentGravityStoreIndex;
+    private Vector2 _startTouchPosition;
+    private Vector2 _endTouchPosition;
 
-    public void ChangeGravityDirection ()
+    public void MyOnMouseDown ()
+    {
+        _startTouchPosition = _mainCamera.ScreenToViewportPoint (Input.mousePosition);
+    }
+
+    public void MyOnMouseUp ()
     {
         if (!GameHelper.Instance.IsSearchEmptyTile)
         {
-            SoundsHelper.Instance.PlayGravitationClip ();
-            _currentGravityStoreIndex++;
-            if (_currentGravityStoreIndex == _gravityStore.Length) _currentGravityStoreIndex = 0;
-            ChangeGravityImage ();
-            OnGravityChange?.Invoke ();
+            _endTouchPosition = _mainCamera.ScreenToViewportPoint (Input.mousePosition);
+            Vector2 direction = _endTouchPosition - _startTouchPosition;
+            if (Mathf.Abs (direction.x) > Mathf.Abs (direction.y))
+            {
+                if (direction.x > 0)
+                {
+                    _currentGravityStoreIndex = (int) GravityDirection.RIGHT;
+                }
+                else
+                {
+                    _currentGravityStoreIndex = (int) GravityDirection.LEFT;
+                }
+            }
+            else
+            {
+                if (direction.y > 0)
+                {
+                    _currentGravityStoreIndex = (int) GravityDirection.UP;
+                }
+                else
+                {
+                    _currentGravityStoreIndex = (int) GravityDirection.DOWN;
+                }
+            }
+            ChangeGravityDirection ();
         }
+    }
+
+    public void ChangeGravityDirection ()
+    {
+        SoundsHelper.Instance.PlayGravitationClip ();
+        ChangeGravityImage ();
+        OnGravityChange?.Invoke ();
     }
 
     public GravityDirection GetDirection ()
@@ -32,12 +65,21 @@ public class GravityChanger : MonoBehaviour
 
     private void ChangeGravityImage ()
     {
-        _buttonImage.sprite = _gravityStore[_currentGravityStoreIndex].gravityImage;
+        DisabelAllSpriteRenderer ();
+        _gravityStore[_currentGravityStoreIndex].spriteRenderer.enabled = true;
     }
 
     private void OnDisable ()
     {
         OnGravityChange.RemoveAllListeners ();
+    }
+
+    private void DisabelAllSpriteRenderer ()
+    {
+        for (var i = 0; i < _gravityStore.Length; i++)
+        {
+            _gravityStore[i].spriteRenderer.enabled = false;
+        }
     }
 }
 
@@ -45,5 +87,5 @@ public class GravityChanger : MonoBehaviour
 public class GravityStore
 {
     public GravityDirection gravityDirection;
-    public Sprite gravityImage;
+    public SpriteRenderer spriteRenderer;
 }

@@ -1,15 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TutorialBoardController : MonoBehaviour
 {
-    [SerializeField] private GravityChanger _gravityChganger;
+    [SerializeField] private TutorialGravityChanger _gravityChganger;
     private int _xSize, _ySize;
     private List<Sprite> _tileSprites = new List<Sprite> ();
     private Tile[, ] _tiles;
     private Vector2[] dirRay = new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
     private bool _isFindMatch;
+    private bool _isFindMatchAgain;
     private bool _isLevelComplete;
+    private bool _isStopFindMatch;
+
     public void SetValues (BoardSettings boardSettings, Tile[, ] tiles)
     {
         _xSize = boardSettings.xSize;
@@ -20,31 +24,30 @@ public class TutorialBoardController : MonoBehaviour
 
     public void SwapTwoTiles (TutorialMainTile mainTile, Tile tile)
     {
-        if (!tile.isEmpty)
+        if (!tile.isEmpty && !tile.isPlayer)
         {
             Sprite cashSprite = mainTile.image.sprite;
             mainTile.image.sprite = tile.spriteRenderer.sprite;
             tile.spriteRenderer.sprite = cashSprite;
             FindAllMatch (tile);
-            SearchEmptyTile ();
             TutorialGameHelper.Instance.StartTutorial2 ();
-            CheckLevelComplete ();
         }
     }
 
     private void CheckLevelComplete ()
     {
         _isLevelComplete = true;
-        for (int x = 0; x < _xSize; x++)
-        {
-            for (int y = 0; y < _ySize; y++)
-            {
-                if (_tiles[x, y].spriteRenderer.sprite != null)
-                {
-                    _isLevelComplete = false;
-                }
-            }
-        }
+        // for (int x = 0; x < _xSize; x++)
+        // {
+        //     for (int y = 0; y < _ySize; y++)
+        //     {
+        //         if (_tiles[x, y].spriteRenderer.sprite != null)
+        //         {
+        //             _isLevelComplete = false;
+        //         }
+        //     }
+        // }
+        if (!_tiles[0, 0].isPlayer) _isLevelComplete = false;
         if (_isLevelComplete)
         {
             DataWorker.Instance.AddLevelCompleteCount ();
@@ -62,10 +65,52 @@ public class TutorialBoardController : MonoBehaviour
     {
         List<Tile> cashFindTile = new List<Tile> ();
         RaycastHit2D hit = Physics2D.Raycast (tile.transform.position, dir);
-        while (hit.collider != null && hit.collider.gameObject.GetComponent<Tile> ().spriteRenderer.sprite == tile.spriteRenderer.sprite)
+        switch (dir.y)
         {
-            cashFindTile.Add (hit.collider.gameObject.GetComponent<Tile> ());
-            hit = Physics2D.Raycast (hit.collider.transform.position, dir);
+            case 0:
+                {
+                    while (hit.collider != null && hit.collider.gameObject.GetComponent<Tile> ().spriteRenderer.sprite == tile.spriteRenderer.sprite)
+                    {
+                        Tile tempTile = hit.collider.gameObject.GetComponent<Tile> ();
+                        if (!cashFindTile.Contains (tempTile))
+                        {
+                            FindNeighborsMatch (tempTile, new Vector2[] { Vector2.up, Vector2.down }, cashFindTile);
+                            cashFindTile.Add (hit.collider.gameObject.GetComponent<Tile> ());
+                            hit = Physics2D.Raycast (hit.collider.transform.position, dir);
+                        }
+                    }
+                    break;
+                }
+            default:
+                while (hit.collider != null && hit.collider.gameObject.GetComponent<Tile> ().spriteRenderer.sprite == tile.spriteRenderer.sprite)
+                {
+                    Tile tempTile = hit.collider.gameObject.GetComponent<Tile> ();
+                    if (!cashFindTile.Contains (tempTile))
+                    {
+                        FindNeighborsMatch (tempTile, new Vector2[] { Vector2.left, Vector2.right }, cashFindTile);
+                        cashFindTile.Add (hit.collider.gameObject.GetComponent<Tile> ());
+                        hit = Physics2D.Raycast (hit.collider.transform.position, dir);
+                    }
+                }
+                break;
+        }
+        return cashFindTile;
+    }
+
+    private List<Tile> FindNeighborsMatch (Tile tile, Vector2[] dir, List<Tile> cashFindTile)
+    {
+        for (int i = 0; i < dir.Length; i++)
+        {
+            RaycastHit2D hit = Physics2D.Raycast (tile.transform.position, dir[i]);
+            while (hit.collider != null && hit.collider.gameObject.GetComponent<Tile> ().spriteRenderer.sprite == tile.spriteRenderer.sprite)
+            {
+                Tile tempTile = hit.collider.gameObject.GetComponent<Tile> ();
+                if (!cashFindTile.Contains (tempTile))
+                {
+                    cashFindTile.Add (hit.collider.gameObject.GetComponent<Tile> ());
+                    hit = Physics2D.Raycast (hit.collider.transform.position, dir[i]);
+                }
+            }
         }
         return cashFindTile;
     }
@@ -77,30 +122,96 @@ public class TutorialBoardController : MonoBehaviour
         {
             cashFindSprite.AddRange (FindMatch (tile, dirArray[i]));
         }
-        if (cashFindSprite.Count >= 2)
+        if (cashFindSprite.Count > 1)
         {
-            for (int i = 0; i < cashFindSprite.Count; i++)
-            {
-                cashFindSprite[i].spriteRenderer.sprite = null;
-            }
+            _isFindMatchAgain = true;
+            StartCoroutine (DeleteSprites (tile, cashFindSprite));
             _isFindMatch = true;
+        }
+    }
+
+    private IEnumerator DeleteSprites (Tile tile, List<Tile> cashTiles)
+    {
+        tile.spriteRenderer.sprite = null;
+        yield return new WaitForSeconds (0.1f);
+        for (int i = 0; i < cashTiles.Count; i++)
+        {
+            SoundsHelper.Instance.PlayDisappearanceTile ();
+            cashTiles[i].spriteRenderer.sprite = null;
+            yield return new WaitForSeconds (0.1f);
+        }
+        SearchEmptyTile ();
+        CheckLevelComplete ();
+    }
+
+    private void FindAllMatchAterGravityChange ()
+    {
+        _isStopFindMatch = false;
+        while (!_isStopFindMatch)
+            FindAllMatchLoop ();
+    }
+
+    private void FindAllMatchLoop ()
+    {
+        _isFindMatchAgain = false;
+        for (int x = 0; x < _xSize; x++)
+        {
+            for (int y = 0; y < _ySize; y++)
+            {
+                FindAllMatch (_tiles[x, y]);
+                if (_isFindMatchAgain)
+                {
+                    return;
+                }
+            }
+            if (x == _xSize - 1)
+            {
+                _isStopFindMatch = true;
+            }
         }
     }
 
     private void FindAllMatch (Tile tile)
     {
         if (tile.isEmpty) return;
-        DeleteSprite (tile, new Vector2[] { Vector2.up, Vector2.down });
-        DeleteSprite (tile, new Vector2[] { Vector2.left, Vector2.right });
-        if (_isFindMatch)
-        {
-            SoundsHelper.Instance.PlayDisappearanceTile ();
-            _isFindMatch = false;
-            tile.spriteRenderer.sprite = null;
-        }
+        DeleteSprite (tile, new Vector2[] { Vector2.up, Vector2.left, Vector2.down, Vector2.right });
     }
 
     private void SearchEmptyTile ()
+    {
+        switch (_gravityChganger.GetDirection ())
+        {
+            case GravityDirection.RIGHT:
+            case GravityDirection.LEFT:
+                {
+                    SerchEmptyHorizontalTile ();
+                    break;
+                }
+            default:
+                {
+                    SerchEmptyVerticalTile ();
+                    break;
+                }
+        }
+        FindAllMatchAterGravityChange ();
+    }
+
+    private void SerchEmptyHorizontalTile ()
+    {
+        for (int y = 0; y < _ySize; y++)
+        {
+            for (int x = 0; x < _xSize; x++)
+            {
+                if (_tiles[x, y].isEmpty)
+                {
+                    ChooseShiftDirection (x, y);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void SerchEmptyVerticalTile ()
     {
         for (int x = 0; x < _xSize; x++)
         {
@@ -109,6 +220,7 @@ public class TutorialBoardController : MonoBehaviour
                 if (_tiles[x, y].isEmpty)
                 {
                     ChooseShiftDirection (x, y);
+                    break;
                 }
             }
         }
@@ -139,6 +251,7 @@ public class TutorialBoardController : MonoBehaviour
                     break;
                 }
         }
+        CheckLevelComplete ();
     }
 
     private void ShiftTileDown (int xPos, int yPos)

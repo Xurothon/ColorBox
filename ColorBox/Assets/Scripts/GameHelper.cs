@@ -6,8 +6,6 @@ public class GameHelper : MonoBehaviour
     public BoardSettings boardSettings;
     [SerializeField] private BoardCreator _borderCreator;
     [SerializeField] private BoardController _borderController;
-    [SerializeField] private TileChanger _tileChanger;
-    public GravityDirection gravityDirection;
     private bool _isSearchEmptyTile;
     public bool IsSearchEmptyTile { get { return _isSearchEmptyTile; } }
 
@@ -39,16 +37,14 @@ public class GameHelper : MonoBehaviour
 
     public void LoadNextScene ()
     {
-        int currentScene = UnityEngine.SceneManagement.SceneManager.sceneCount;
+        int currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
+        Debug.Log(currentScene);
         currentScene++;
+        Debug.Log(currentScene);
         if (currentScene > UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings - 1) currentScene = 0;
         UnityEngine.SceneManagement.SceneManager.LoadScene (currentScene);
     }
 
-    public void DisableCileChanger ()
-    {
-        _tileChanger.DisableChanger ();
-    }
     public void StartSearchEmptyTile ()
     {
         _isSearchEmptyTile = true;

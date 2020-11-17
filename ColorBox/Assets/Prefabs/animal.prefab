@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6123622717516470851}
   - component: {fileID: 4315806594863640399}
   - component: {fileID: 1548287905967216986}
-  - component: {fileID: 1132947730519092656}
   m_Layer: 0
   m_Name: animal
   m_TagString: Untagged
@@ -74,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 584c1a929e1b07946a116e5ccedd0365, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1f952ac99f4e3824899246db3f528fc3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -98,6 +97,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 6123622717516470851}
+  playerSprite: {fileID: 21300000, guid: 1487c0524e034f54b9ee1d672954edc0, type: 3}
+  blockSprite: {fileID: 21300000, guid: a6f686cf70ba0994c87773960f28b4ae, type: 3}
+  enemySprite: {fileID: 21300000, guid: bbbc1d4570a11d4478b97c5cc06b3bbd, type: 3}
   isBlock: 0
   xPosition: 0
   yPosition: 0
@@ -118,29 +120,12 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.8114286, y: 0.8114286}
+    oldSize: {x: 0.45806453, y: 0.45806453}
     newSize: {x: 2.84, y: 2.84}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.8, y: 0.8}
+  m_Size: {x: 0.45, y: 0.45}
   m_EdgeRadius: 0
---- !u!114 &1132947730519092656
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2725749008787335655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 3
-    callback:
-      m_PersistentCalls:
-        m_Calls: []

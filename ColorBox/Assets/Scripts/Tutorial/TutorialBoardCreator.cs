@@ -3,20 +3,19 @@ using UnityEngine;
 
 public class TutorialBoardCreator : MonoBehaviour
 {
-    [SerializeField] private Sprite _sprite1;
-    [SerializeField] private Sprite _sprite2;
-    [SerializeField] private Sprite _sprite3;
+    [SerializeField] private Sprite _playerSprite;
+    [SerializeField] private Sprite[] _tileSprites;
     private int _xSize, _ySize;
     private Tile _tile;
-    private List<Sprite> _tileSprites = new List<Sprite> ();
     private Sprite _cashSprite = null;
+    private LevelTileArrays _levelTileArray;
 
     public Tile[, ] SetValues (BoardSettings boardSettings)
     {
         _xSize = boardSettings.xSize;
         _ySize = boardSettings.ySize;
         _tile = boardSettings.tile;
-        _tileSprites = boardSettings.tileSprites;
+        _levelTileArray = new LevelTileArrays ();
         return CreateBoard ();
     }
 
@@ -26,6 +25,8 @@ public class TutorialBoardCreator : MonoBehaviour
         float xPos = transform.position.x;
         float yPos = transform.position.y;
         Vector2 tileSize = _tile.spriteRenderer.bounds.size;
+        int currentScene = int.Parse (UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name);
+        TileType[, ] tileTypes = _levelTileArray.GetLevelArray (currentScene);
         for (int x = 0; x < _xSize; x++)
         {
             for (int y = 0; y < _ySize; y++)
@@ -34,9 +35,9 @@ public class TutorialBoardCreator : MonoBehaviour
                 newTile.transform.position = new Vector3 (xPos + (tileSize.x * x), yPos + (tileSize.y * y), 0);
                 newTile.transform.parent = transform;
                 tileArray[x, y] = newTile;
+                newTile.spriteRenderer.sprite = GetTileSprite (tileTypes[y, x]);
             }
         }
-        ChangeSprite (tileArray);
         for (int y = 0; y < _ySize; y++)
         {
             Tile newTile = Instantiate (_tile, transform.position, Quaternion.identity);
@@ -47,19 +48,19 @@ public class TutorialBoardCreator : MonoBehaviour
         return tileArray;
     }
 
-    private void ChangeSprite (Tile[, ] tileArray)
+    private Sprite GetTileSprite (TileType tileType)
     {
-        tileArray[0, 2].spriteRenderer.sprite = _sprite2;
-        tileArray[1, 2].spriteRenderer.sprite = _sprite3;
-        tileArray[2, 2].spriteRenderer.sprite = _sprite1;
-        Sprite[] sprites = { _sprite1, _sprite2, _sprite3 };
-        for (int x = 0; x < _xSize; x++)
+        switch (tileType)
         {
-            for (int y = _ySize - 2; y > -1; y--)
-            {
-                tileArray[x, y].spriteRenderer.sprite = sprites[x];
-            }
-
+            case TileType.TYPE1:
+                return _tileSprites[0];
+            case TileType.TYPE2:
+                return _tileSprites[1];
+            case TileType.TYPE3:
+                return _tileSprites[2];
+            case TileType.PLAYER:
+                return _playerSprite;
         }
+        return _tileSprites[0];
     }
 }

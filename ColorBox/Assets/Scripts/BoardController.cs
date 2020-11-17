@@ -7,7 +7,6 @@ public class BoardController : MonoBehaviour
     [SerializeField] private GravityChanger _gravityChganger;
     [SerializeField] private StepCancel _stepCancel;
     private int _xSize, _ySize;
-    private List<Sprite> _tileSprites = new List<Sprite> ();
     private Tile[, ] _tiles;
     private bool _isLevelComplete;
     private bool _useBlocks;
@@ -19,7 +18,6 @@ public class BoardController : MonoBehaviour
     {
         _xSize = boardSettings.xSize;
         _ySize = boardSettings.ySize;
-        _tileSprites = boardSettings.tileSprites;
         _tiles = tiles;
         _useBlocks = boardSettings.useBlocks;
         _blockSprite = boardSettings.blockSprite;
@@ -30,7 +28,7 @@ public class BoardController : MonoBehaviour
     {
         if (!tile.isEmpty)
         {
-            if (!tile.isBlock)
+            if (!tile.isBlock && !tile.isPlayer)
             {
                 _stepCancel.SavePreviosStep ();
                 Sprite cashSprite = mainTile.image.sprite;
@@ -51,16 +49,18 @@ public class BoardController : MonoBehaviour
     private void CheckLevelComplete ()
     {
         _isLevelComplete = true;
-        for (int x = 0; x < _xSize; x++)
-        {
-            for (int y = 0; y < _ySize; y++)
-            {
-                if (_tiles[x, y].spriteRenderer.sprite != null)
-                {
-                    _isLevelComplete = false;
-                }
-            }
-        }
+        // for (int x = 0; x < _xSize; x++)
+        // {
+        //     for (int y = 0; y < _ySize; y++)
+        //     {
+        //         if (_tiles[x, y].spriteRenderer.sprite != null)
+        //         {
+        //             if (!_tiles[x, y].isBlock)
+        //                 _isLevelComplete = false;
+        //         }
+        //     }
+        // }
+        if (!_tiles[0, 0].isPlayer) _isLevelComplete = false;
         if (_isLevelComplete)
         {
             DataWorker.Instance.AddLevelCompleteCount ();
@@ -137,7 +137,8 @@ public class BoardController : MonoBehaviour
         }
         if (cashFindSprite.Count > 1)
         {
-            if (cashFindSprite.Count > 2)
+            _isFindMatchAgain = true;
+            if (cashFindSprite.Count > 3)
             {
                 DataWorker.Instance.AddCrystal (1);
             }
@@ -168,6 +169,7 @@ public class BoardController : MonoBehaviour
 
     private void FindAllMatchLoop ()
     {
+        _isFindMatchAgain = false;
         for (int x = 0; x < _xSize; x++)
         {
             for (int y = 0; y < _ySize; y++)
@@ -184,9 +186,11 @@ public class BoardController : MonoBehaviour
             }
         }
     }
+
     private void FindAllMatch (Tile tile)
     {
         if (tile.isEmpty) return;
+        if (tile.isBlock) return;
         DeleteSprite (tile, new Vector2[] { Vector2.up, Vector2.left, Vector2.down, Vector2.right });
     }
 
@@ -266,6 +270,7 @@ public class BoardController : MonoBehaviour
                     break;
                 }
         }
+        CheckLevelComplete ();
     }
 
     #region DownGravity

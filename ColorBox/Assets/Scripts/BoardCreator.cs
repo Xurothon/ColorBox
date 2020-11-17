@@ -5,21 +5,23 @@ public class BoardCreator : MonoBehaviour
 {
     [SerializeField] private int _minBlockCount;
     [SerializeField] private int _maxBlocksCount;
-    private Sprite _blockSprite;
+    [SerializeField] private Sprite _playerSprite;
+    [SerializeField] private Sprite _enemySprite;
+    [SerializeField] private Sprite _blockSprite;
+    [SerializeField] private Sprite[] _tileSprites;
     private bool _useBlocks;
     private int _xSize, _ySize;
     private Tile _tile;
-    private List<Sprite> _tileSprites = new List<Sprite> ();
     private Sprite _cashSprite = null;
+    private LevelTileArrays _levelTileArray;
 
     public Tile[, ] SetValues (BoardSettings boardSettings)
     {
         _xSize = boardSettings.xSize;
         _ySize = boardSettings.ySize;
         _tile = boardSettings.tile;
-        _tileSprites = boardSettings.tileSprites;
         _useBlocks = boardSettings.useBlocks;
-        _blockSprite = boardSettings.blockSprite;
+        _levelTileArray = new LevelTileArrays ();
         return CreateBoard ();
     }
 
@@ -29,23 +31,23 @@ public class BoardCreator : MonoBehaviour
         float xPos = transform.position.x;
         float yPos = transform.position.y;
         Vector2 tileSize = _tile.spriteRenderer.bounds.size;
-        for (int x = 0; x < _xSize; x++)
+        int currentScene = int.Parse (UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name);
+        TileType[, ] tileTypes = _levelTileArray.GetLevelArray (currentScene);
+        for (int y = 0; y < _ySize; y++)
         {
-            for (int y = 0; y < _ySize; y++)
+            for (int x = 0; x < _xSize; x++)
             {
                 Tile newTile = Instantiate (_tile, transform.position, Quaternion.identity);
                 newTile.transform.position = new Vector3 (xPos + (tileSize.x * x), yPos + (tileSize.y * y), 0);
                 newTile.transform.parent = transform;
                 tileArray[x, y] = newTile;
-                List<Sprite> tempSprite = new List<Sprite> ();
-                tempSprite.AddRange (_tileSprites);
-                tempSprite.Remove (_cashSprite);
-                if (x > 0)
+                newTile.spriteRenderer.sprite = GetTileSprite (tileTypes[y, x]);
+                if (tileTypes[y, x] == TileType.BLOCK)
                 {
-                    tempSprite.Remove (tileArray[x - 1, y].spriteRenderer.sprite);
+                    newTile.xPosition = x;
+                    newTile.yPosition = y;
+                    newTile.isBlock = true;
                 }
-                _cashSprite = tempSprite[Random.Range (0, tempSprite.Count)];
-                newTile.spriteRenderer.sprite = _cashSprite;
             }
         }
         for (int y = 0; y < _ySize; y++)
@@ -55,47 +57,26 @@ public class BoardCreator : MonoBehaviour
             newTile.transform.parent = transform;
             newTile.spriteRenderer.sprite = null;
         }
-        if (_useBlocks)
-        {
-            CreateBlocks (tileArray);
-        }
         return tileArray;
     }
 
-    private void CreateBlocks (Tile[, ] tiles)
+    private Sprite GetTileSprite (TileType tileType)
     {
-        int blockCount = Random.Range (_minBlockCount, _maxBlocksCount + 1);
-        List<int> xBlockPositions = new List<int> ();
-        while (xBlockPositions.Count < blockCount)
+        switch (tileType)
         {
-            int tempXPosition = Random.Range (0, _xSize);
-            if (!xBlockPositions.Contains (tempXPosition))
-            {
-                xBlockPositions.Add (tempXPosition);
-            }
+            case TileType.TYPE1:
+                return _tileSprites[0];
+            case TileType.TYPE2:
+                return _tileSprites[1];
+            case TileType.TYPE3:
+                return _tileSprites[2];
+            case TileType.BLOCK:
+                return _blockSprite;
+            case TileType.PLAYER:
+                return _playerSprite;
+            case TileType.ENEMY:
+                return _enemySprite;
         }
-
-        for (int i = 0; i < xBlockPositions.Count; i++)
-        {
-            int tempYPosition = Random.Range (1, _ySize - 1);
-            CreateOneBlock (tiles[xBlockPositions[i], tempYPosition], xBlockPositions[i], tempYPosition);
-            int nextYPositionBlock = GetNextYPosition ();
-            CreateOneBlock (tiles[xBlockPositions[i], tempYPosition + nextYPositionBlock], xBlockPositions[i], tempYPosition + nextYPositionBlock);
-        }
-    }
-
-    private void CreateOneBlock (Tile tile, int xPos, int yPos)
-    {
-        tile.isBlock = true;
-        tile.spriteRenderer.sprite = _blockSprite;
-        tile.xPosition = xPos;
-        tile.yPosition = yPos;
-    }
-
-    private int GetNextYPosition ()
-    {
-        int tempValue = Random.Range (0, 2);
-        if (tempValue == 0) return -1;
-        return tempValue;
+        return _tileSprites[0];
     }
 }

@@ -8,12 +8,20 @@ public class DataWorker : MonoBehaviour
     public int crystal { get; private set; }
     public int isBuyAdsOff { get; private set; }
     public int levelCompleteCount { get; private set; }
+    private int _crystalInLevel;
 
     [HideInInspector] public MyIntEvent OnValueChangeCrystal;
 
     public void AddCrystal (int value)
     {
+        _crystalInLevel += value;
         crystal += value;
+        OnValueChangeCrystal?.Invoke (crystal);
+    }
+
+    public void GetDoubleCrystal ()
+    {
+        crystal += _crystalInLevel;
         OnValueChangeCrystal?.Invoke (crystal);
     }
 
