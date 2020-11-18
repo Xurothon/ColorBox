@@ -6,6 +6,7 @@ public class BoardController : MonoBehaviour
 {
     [SerializeField] private GravityChanger _gravityChganger;
     [SerializeField] private StepCancel _stepCancel;
+    [SerializeField] private StepLimiter _stepLimiter;
     private int _xSize, _ySize;
     private Tile[, ] _tiles;
     private bool _isLevelComplete;
@@ -22,14 +23,16 @@ public class BoardController : MonoBehaviour
         _useBlocks = boardSettings.useBlocks;
         _blockSprite = boardSettings.blockSprite;
         _stepCancel.SetValues (boardSettings, tiles);
+        _stepLimiter.SetVelues (boardSettings);
     }
 
     public void SwapTwoTiles (MainTile mainTile, Tile tile)
     {
         if (!tile.isEmpty)
         {
-            if (!tile.isBlock && !tile.isPlayer)
+            if (!tile.isBlock && !tile.isPlayer && !tile.isEnemy)
             {
+                _stepLimiter.MakeStep ();
                 _stepCancel.SavePreviosStep ();
                 Sprite cashSprite = mainTile.image.sprite;
                 mainTile.image.sprite = tile.spriteRenderer.sprite;
@@ -49,17 +52,6 @@ public class BoardController : MonoBehaviour
     private void CheckLevelComplete ()
     {
         _isLevelComplete = true;
-        // for (int x = 0; x < _xSize; x++)
-        // {
-        //     for (int y = 0; y < _ySize; y++)
-        //     {
-        //         if (_tiles[x, y].spriteRenderer.sprite != null)
-        //         {
-        //             if (!_tiles[x, y].isBlock)
-        //                 _isLevelComplete = false;
-        //         }
-        //     }
-        // }
         if (!_tiles[0, 0].isPlayer) _isLevelComplete = false;
         if (_isLevelComplete)
         {
@@ -70,12 +62,19 @@ public class BoardController : MonoBehaviour
 
     private void Start ()
     {
-        _gravityChganger.OnGravityChange.AddListener (_stepCancel.SavePreviosStep);
-        _gravityChganger.OnGravityChange.AddListener (SearchEmptyTile);
+        _gravityChganger.OnGravityChange.AddListener (CallAllMethodAfterGravityChange);
+    }
+
+    private void CallAllMethodAfterGravityChange ()
+    {
+        _stepCancel.SavePreviosStep ();
+        SearchEmptyTile ();
+        _stepLimiter.MakeStep ();
     }
 
     private List<Tile> FindMatch (Tile tile, Vector2 dir)
     {
+
         List<Tile> cashFindTile = new List<Tile> ();
         RaycastHit2D hit = Physics2D.Raycast (tile.transform.position, dir);
         switch (dir.y)
@@ -191,7 +190,9 @@ public class BoardController : MonoBehaviour
     {
         if (tile.isEmpty) return;
         if (tile.isBlock) return;
+        if (tile.isEnemy) return;
         DeleteSprite (tile, new Vector2[] { Vector2.up, Vector2.left, Vector2.down, Vector2.right });
+        CheckEnemyBeside ();
     }
 
     private void SearchEmptyTile ()
@@ -313,7 +314,6 @@ public class BoardController : MonoBehaviour
                 if (!_tiles[xPos, y].isBlock)
                 {
                     ShiftBlocksDown (xPos, y);
-                    break;
                 }
             }
         }
@@ -395,7 +395,6 @@ public class BoardController : MonoBehaviour
                 if (!_tiles[xPos, y].isBlock)
                 {
                     ShiftBlocksUp (xPos, y);
-                    break;
                 }
             }
         }
@@ -601,4 +600,53 @@ public class BoardController : MonoBehaviour
         }
     }
     #endregion
+
+    private void CheckEnemyBeside ()
+    {
+        Tile player = FindPlayer ();
+        bool isEnemyBeside = false;
+        if (player != null)
+        {
+            Vector2[] dir = new Vector2[] { Vector2.up, Vector2.down, Vector2.right, Vector2.left };
+            for (int i = 0; i < dir.Length; i++)
+            {
+                if (!isEnemyBeside)
+                {
+                    RaycastHit2D hit = Physics2D.Raycast (player.transform.position, dir[i]);
+                    Tile tempTile = GetTile (hit);
+                    if (tempTile != null && tempTile.isEnemy)
+                    {
+                        isEnemyBeside = true;
+                    }
+                }
+            }
+        }
+        if (isEnemyBeside) _stepLimiter.ActiveRestartPanel ();
+    }
+
+    private Tile FindPlayer ()
+    {
+        for (int x = 0; x < _xSize; x++)
+        {
+            for (int y = 0; y < _ySize; y++)
+            {
+                if (_tiles[x, y].isPlayer)
+                {
+                    return _tiles[x, y];
+                }
+            }
+        }
+        return null;
+    }
+
+    private Tile GetTile (RaycastHit2D rayHit)
+    {
+        Tile tile = null;
+        try
+        {
+            tile = rayHit.collider.gameObject.GetComponent<Tile> ();
+        }
+        catch { }
+        return tile;
+    }
 }

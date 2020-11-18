@@ -10,22 +10,21 @@ public class TileChanger : MonoBehaviour
     {
         Vector2 curMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
         RaycastHit2D hitRight = Physics2D.Raycast (curMousePos, Vector2.right);
-        Tile tile = null;
-        try
-        {
-            tile = hitRight.collider.gameObject.GetComponent<Tile> ();
-        }
-        catch { }
+        Tile tile = GetTile (hitRight);
         if (tile != null)
         {
             RaycastHit2D hitLeft = Physics2D.Raycast (hitRight.collider.transform.position, Vector2.left);
-            if (hitLeft.collider.gameObject.GetComponent<Tile> ().spriteRenderer.sprite != null)
+            Tile leftTile = GetTile (hitLeft);
+            if (leftTile != null)
             {
-                _cashTile = hitLeft.collider.gameObject.GetComponent<Tile> ();
-                _bonusPriceList.IsBuyTileChange ();
+                if (!leftTile.isBlock && !leftTile.isPlayer && !leftTile.isEnemy)
+                {
+                    _cashTile = hitLeft.collider.gameObject.GetComponent<Tile> ();
+                    _bonusPriceList.IsBuyTileChange ();
+                    _tileChangePanel.SetActive (false);
+                }
             }
         }
-        _tileChangePanel.SetActive (false);
     }
 
     public void ActiveChanger ()
@@ -42,5 +41,16 @@ public class TileChanger : MonoBehaviour
     public void ChangeTileAfterVideo ()
     {
         GameUIHelper.Instance.ShowTileChangePanel ();
+    }
+
+    private Tile GetTile (RaycastHit2D rayHit)
+    {
+        Tile tile = null;
+        try
+        {
+            tile = rayHit.collider.gameObject.GetComponent<Tile> ();
+        }
+        catch { }
+        return tile;
     }
 }

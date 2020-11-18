@@ -13,7 +13,7 @@ public class MainUIHelper : MonoBehaviour
 
     public void CheckLevelCompleteCount ()
     {
-        if (DataWorker.Instance.levelCompleteCount == 2)
+        if (DataWorker.Instance.levelCompleteCount == 3)
         {
             _adsPanel.SetActive (true);
             DataWorker.Instance.ResetLevelCompleteCount ();

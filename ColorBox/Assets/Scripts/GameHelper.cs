@@ -37,10 +37,8 @@ public class GameHelper : MonoBehaviour
 
     public void LoadNextScene ()
     {
-        int currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
-        Debug.Log(currentScene);
+        int currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene ().buildIndex;
         currentScene++;
-        Debug.Log(currentScene);
         if (currentScene > UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings - 1) currentScene = 0;
         UnityEngine.SceneManagement.SceneManager.LoadScene (currentScene);
     }

@@ -9,6 +9,7 @@ public class DataWorker : MonoBehaviour
     public int isBuyAdsOff { get; private set; }
     public int levelCompleteCount { get; private set; }
     private int _crystalInLevel;
+    private bool _isTakeAwayCrystal;
 
     [HideInInspector] public MyIntEvent OnValueChangeCrystal;
 
@@ -43,6 +44,15 @@ public class DataWorker : MonoBehaviour
     public void ResetLevelCompleteCount ()
     {
         levelCompleteCount = 0;
+    }
+
+    public void TakeAwayCrystal ()
+    {
+        if (!_isTakeAwayCrystal)
+        {
+            crystal -= _crystalInLevel;
+            _isTakeAwayCrystal = true;
+        }
     }
 
     private void Awake ()

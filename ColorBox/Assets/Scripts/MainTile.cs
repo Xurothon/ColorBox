@@ -85,9 +85,12 @@ public class MainTile : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDo
 
     private void MakeBigTile (Tile tile)
     {
-        tile.transform.localScale = new Vector3 (2f, 2f, 2f);
-        tile.spriteRenderer.sortingOrder = 1;
-        _cashTile = tile;
+        if (!tile.isEnemy && !tile.isBlock)
+        {
+            tile.transform.localScale = new Vector3 (2f, 2f, 2f);
+            tile.spriteRenderer.sortingOrder = 1;
+            _cashTile = tile;
+        }
     }
 
     private void MakeNormalTile (Tile tile)

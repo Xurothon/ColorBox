@@ -56,14 +56,16 @@ public class StepCancel : MonoBehaviour
 
     public void ResetStartStep ()
     {
-        _mainTail.image.sprite = _startMainSprite;
-        for (int x = 0; x < _xSize; x++)
-        {
-            for (int y = 0; y < _ySize; y++)
-            {
-                _tiles[x, y].spriteRenderer.sprite = _startSprites[x, y];
-            }
-        }
+        // _mainTail.image.sprite = _startMainSprite;
+        // for (int x = 0; x < _xSize; x++)
+        // {
+        //     for (int y = 0; y < _ySize; y++)
+        //     {
+        //         _tiles[x, y].spriteRenderer.sprite = _startSprites[x, y];
+        //     }
+        // }
+        int currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene ().buildIndex;
+        UnityEngine.SceneManagement.SceneManager.LoadScene (currentScene);
     }
 
     public void CancelStepAfterVideo ()
