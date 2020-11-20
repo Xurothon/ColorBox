@@ -49,6 +49,13 @@ public class BoardController : MonoBehaviour
         FindAllMatch (tile);
     }
 
+    public void DeleteOneSprite (Tile tile)
+    {
+        _stepCancel.SavePreviosStep ();
+        tile.spriteRenderer.sprite = null;
+        SearchEmptyTile ();
+    }
+
     private void CheckLevelComplete ()
     {
         _isLevelComplete = true;

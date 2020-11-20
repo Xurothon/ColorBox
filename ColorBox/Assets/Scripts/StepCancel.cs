@@ -5,9 +5,7 @@ public class StepCancel : MonoBehaviour
     [SerializeField] private MainTile _mainTail;
     [SerializeField] private BonusPriceList _bonusPriceList;
     private Sprite[, ] _previousSprites;
-    private Sprite[, ] _startSprites;
     private Sprite _previousMainSprite;
-    private Sprite _startMainSprite;
     private Tile[, ] _tiles;
     private int _xSize, _ySize;
     private bool _isSave;
@@ -18,8 +16,6 @@ public class StepCancel : MonoBehaviour
         _ySize = boardSettings.ySize;
         _tiles = tiles;
         _previousSprites = new Sprite[_xSize, _ySize];
-        _startSprites = new Sprite[_xSize, _ySize];
-        SaveStartStep ();
     }
 
     public void SavePreviosStep ()
@@ -56,15 +52,7 @@ public class StepCancel : MonoBehaviour
 
     public void ResetStartStep ()
     {
-        // _mainTail.image.sprite = _startMainSprite;
-        // for (int x = 0; x < _xSize; x++)
-        // {
-        //     for (int y = 0; y < _ySize; y++)
-        //     {
-        //         _tiles[x, y].spriteRenderer.sprite = _startSprites[x, y];
-        //     }
-        // }
-        int currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene ().buildIndex;
+        int currentScene = int.Parse (UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name);
         UnityEngine.SceneManagement.SceneManager.LoadScene (currentScene);
     }
 
@@ -81,18 +69,6 @@ public class StepCancel : MonoBehaviour
                 }
             }
             _isSave = false;
-        }
-    }
-
-    private void SaveStartStep ()
-    {
-        _startMainSprite = _mainTail.image.sprite;
-        for (int x = 0; x < _xSize; x++)
-        {
-            for (int y = 0; y < _ySize; y++)
-            {
-                _startSprites[x, y] = _tiles[x, y].spriteRenderer.sprite;
-            }
         }
     }
 }

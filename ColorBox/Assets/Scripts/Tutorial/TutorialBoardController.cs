@@ -6,7 +6,6 @@ public class TutorialBoardController : MonoBehaviour
 {
     [SerializeField] private TutorialGravityChanger _gravityChganger;
     private int _xSize, _ySize;
-    private List<Sprite> _tileSprites = new List<Sprite> ();
     private Tile[, ] _tiles;
     private Vector2[] dirRay = new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
     private bool _isFindMatch;
@@ -18,7 +17,6 @@ public class TutorialBoardController : MonoBehaviour
     {
         _xSize = boardSettings.xSize;
         _ySize = boardSettings.ySize;
-        _tileSprites = boardSettings.tileSprites;
         _tiles = tiles;
     }
 
