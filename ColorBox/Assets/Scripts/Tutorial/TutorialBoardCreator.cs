@@ -5,6 +5,7 @@ public class TutorialBoardCreator : MonoBehaviour
 {
     [SerializeField] private Sprite _playerSprite;
     [SerializeField] private Sprite[] _tileSprites;
+    [SerializeField] private BackgroundCreator _backgroundCreator;
     private int _xSize, _ySize;
     private Tile _tile;
     private Sprite _cashSprite = null;
@@ -16,6 +17,7 @@ public class TutorialBoardCreator : MonoBehaviour
         _ySize = boardSettings.ySize;
         _tile = boardSettings.tile;
         _levelTileArray = new LevelTileArrays ();
+        _backgroundCreator.SetValues(_xSize, _ySize);
         return CreateBoard ();
     }
 

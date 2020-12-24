@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BoardCreator : MonoBehaviour
 {
@@ -7,10 +6,9 @@ public class BoardCreator : MonoBehaviour
     [SerializeField] private Sprite _enemySprite;
     [SerializeField] private Sprite _blockSprite;
     [SerializeField] private Sprite[] _tileSprites;
-    private bool _useBlocks;
+    [SerializeField] private BackgroundCreator _backgroundCreator;
     private int _xSize, _ySize;
     private Tile _tile;
-    private Sprite _cashSprite = null;
     private LevelTileArrays _levelTileArray;
 
     public Tile[, ] SetValues (BoardSettings boardSettings)
@@ -18,8 +16,8 @@ public class BoardCreator : MonoBehaviour
         _xSize = boardSettings.xSize;
         _ySize = boardSettings.ySize;
         _tile = boardSettings.tile;
-        _useBlocks = boardSettings.useBlocks;
         _levelTileArray = new LevelTileArrays ();
+        _backgroundCreator.SetValues(_xSize, _ySize);
         return CreateBoard ();
     }
 
